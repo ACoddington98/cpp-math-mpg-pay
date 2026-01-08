@@ -1,0 +1,268 @@
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <limits> // for numeric_limits
+using namespace std;
+
+/* FUNCTION PROTOTYPES */
+double AC_add(double a, double b);
+double AC_sub(double a, double b);
+double AC_mult(double a, double b);
+double AC_div(double a, double b);
+void print_result(double a, double b, double result, char op);
+
+// MPG & Payroll structures
+struct MPG {
+    string carName;
+    string tripName;
+    double gasUsed;
+    double milesDriven;
+    double mpg;
+};
+
+struct Pay {
+    string employeeName;
+    double hoursWorked;
+    double hourlyRate;
+    double pay;
+};
+
+// Function prototypes for MPG and Pay
+void calcMPG(vector<MPG> &trips);
+void viewMPG(const vector<MPG> &trips);
+void saveMPGToFile(const vector<MPG> &trips, const string &filename);
+void viewMPGFile(const string &filename);
+
+void calcPay(vector<Pay> &employees);
+void viewPay(const vector<Pay> &employees);
+void savePayToFile(const vector<Pay> &employees, const string &filename);
+void viewPayFile(const string &filename);
+
+/* MAIN PROGRAM */
+int main() {
+    string username;
+    int choice;
+    double x, y, result;
+
+    vector<MPG> mpgTrips;
+    vector<Pay> employeePays;
+
+    const string mpgFile = "mpg.txt";
+    const string payFile = "pay.txt";
+
+    cout << "Enter your name: ";
+    getline(cin, username);  // No cin.ignore() needed here
+
+    while (true) {
+        cout << "\n--- MENU ---\n";
+        cout << "1. Add\n";
+        cout << "2. Subtract\n";
+        cout << "3. Multiply\n";
+        cout << "4. Divide\n";
+        cout << "5. Calc MPG\n";
+        cout << "6. View MPG Calculations\n";
+        cout << "7. Save MPG to file\n";
+        cout << "8. View MPG file\n";
+        cout << "9. Calc Simple Pay\n";
+        cout << "10. View Simple Pay Calculations\n";
+        cout << "11. Save Simple Pay to file\n";
+        cout << "12. View Simple Pay file\n";
+        cout << "13. Exit\n";
+        cout << "Enter your selection: ";
+        cin >> choice;
+
+        // Clear newline left in buffer
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if (choice == 13) {
+            cout << username << " thanks you for using my application.\n";
+            break;
+        }
+
+        if (choice < 1 || choice > 13) {
+            cout << "Invalid menu option. Try again.\n";
+            continue;
+        }
+
+        if (choice >= 1 && choice <= 4) {
+            while (true) {
+                cout << "Enter two numbers: ";
+                cin >> x >> y;
+
+                if (!cin) {
+                    cin.clear();
+                    cin.ignore(1000, '\n');
+                    cout << "Invalid input. Enter numeric values only.\n";
+                    continue;
+                }
+
+                if (choice == 4 && y == 0) {
+                    cout << "Cannot divide by zero. Try again.\n";
+                    continue;
+                }
+                cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear leftover newline
+                break;
+            }
+
+            switch (choice) {
+                case 1:
+                    result = AC_add(x, y);
+                    print_result(x, y, result, '+');
+                    break;
+                case 2:
+                    result = AC_sub(x, y);
+                    print_result(x, y, result, '-');
+                    break;
+                case 3:
+                    result = AC_mult(x, y);
+                    print_result(x, y, result, '*');
+                    break;
+                case 4:
+                    result = AC_div(x, y);
+                    print_result(x, y, result, '/');
+                    break;
+            }
+        } else if (choice == 5) {
+            calcMPG(mpgTrips);
+        } else if (choice == 6) {
+            viewMPG(mpgTrips);
+        } else if (choice == 7) {
+            saveMPGToFile(mpgTrips, mpgFile);
+        } else if (choice == 8) {
+            viewMPGFile(mpgFile);
+        } else if (choice == 9) {
+            calcPay(employeePays);
+        } else if (choice == 10) {
+            viewPay(employeePays);
+        } else if (choice == 11) {
+            savePayToFile(employeePays, payFile);
+        } else if (choice == 12) {
+            viewPayFile(payFile);
+        }
+    }
+
+    return 0;
+}
+
+/************* NUMERIC FUNCTIONS *************/
+double AC_add(double a, double b) { return a + b; }
+double AC_sub(double a, double b) { return a - b; }
+double AC_mult(double a, double b) { return a * b; }
+double AC_div(double a, double b) { return a / b; }
+
+/************* PRINT RESULT FUNCTION *************/
+void print_result(double a, double b, double result, char op) {
+    cout << a << " " << op << " " << b << " = " << result << "\n";
+}
+
+/************* MPG FUNCTIONS *************/
+void calcMPG(vector<MPG> &trips) {
+    MPG m;
+    cout << "Enter car name: ";
+    getline(cin, m.carName);
+    cout << "Enter trip name: ";
+    getline(cin, m.tripName);
+    cout << "Enter gas used (gallons): ";
+    cin >> m.gasUsed;
+    cout << "Enter miles driven: ";
+    cin >> m.milesDriven;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear newline
+    m.mpg = AC_div(m.milesDriven, m.gasUsed);
+
+    trips.push_back(m);
+
+    cout << "\nMPG Calculated:\n";
+    cout << "Car: " << m.carName << ", Trip: " << m.tripName
+         << ", Gas Used: " << m.gasUsed << ", Miles: " << m.milesDriven
+         << ", MPG: " << m.mpg << "\n";
+}
+
+void viewMPG(const vector<MPG> &trips) {
+    if (trips.empty()) {
+        cout << "No MPG calculations yet.\n";
+        return;
+    }
+    for (const auto &m : trips) {
+        cout << "Car: " << m.carName << ", Trip: " << m.tripName
+             << ", Gas Used: " << m.gasUsed << ", Miles: " << m.milesDriven
+             << ", MPG: " << m.mpg << "\n";
+    }
+}
+
+void saveMPGToFile(const vector<MPG> &trips, const string &filename) {
+    ofstream fout(filename);
+    for (const auto &m : trips) {
+        fout << m.carName << "," << m.tripName << "," << m.gasUsed << ","
+             << m.milesDriven << "," << m.mpg << "\n";
+    }
+    fout.close();
+    cout << "MPG data saved to " << filename << "\n";
+}
+
+void viewMPGFile(const string &filename) {
+    ifstream fin(filename);
+    string line;
+    if (!fin) {
+        cout << "File not found.\n";
+        return;
+    }
+    while (getline(fin, line)) {
+        cout << line << "\n";
+    }
+    fin.close();
+}
+
+/************* PAY FUNCTIONS *************/
+void calcPay(vector<Pay> &employees) {
+    Pay p;
+    cout << "Enter employee name: ";
+    getline(cin, p.employeeName);
+    cout << "Enter hours worked: ";
+    cin >> p.hoursWorked;
+    cout << "Enter hourly rate: ";
+    cin >> p.hourlyRate;
+    cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Clear newline
+    p.pay = AC_mult(p.hoursWorked, p.hourlyRate);
+
+    employees.push_back(p);
+
+    cout << "\nPay Calculated:\n";
+    cout << "Employee: " << p.employeeName << ", Hours: " << p.hoursWorked
+         << ", Rate: $" << p.hourlyRate << ", Pay: $" << p.pay << "\n";
+}
+
+void viewPay(const vector<Pay> &employees) {
+    if (employees.empty()) {
+        cout << "No pay calculations yet.\n";
+        return;
+    }
+    for (const auto &p : employees) {
+        cout << "Employee: " << p.employeeName << ", Hours: " << p.hoursWorked
+             << ", Rate: $" << p.hourlyRate << ", Pay: $" << p.pay << "\n";
+    }
+}
+
+void savePayToFile(const vector<Pay> &employees, const string &filename) {
+    ofstream fout(filename);
+    for (const auto &p : employees) {
+        fout << p.employeeName << "," << p.hoursWorked << ","
+             << p.hourlyRate << "," << p.pay << "\n";
+    }
+    fout.close();
+    cout << "Pay data saved to " << filename << "\n";
+}
+
+void viewPayFile(const string &filename) {
+    ifstream fin(filename);
+    string line;
+    if (!fin) {
+        cout << "File not found.\n";
+        return;
+    }
+    while (getline(fin, line)) {
+        cout << line << "\n";
+    }
+    fin.close();
+}
